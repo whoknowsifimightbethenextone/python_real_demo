@@ -3,319 +3,708 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python 项目演示模板</title>
-    <!-- 引入 Tailwind CSS 进行快速布局 -->
+    <title>GreenCommute Tracker 演示 (Python Theme)</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 JetBrains Mono 字体，适合代码展示 -->
+    <!-- 引入 JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #0f172a;
-            --code-bg: #1e293b;
-            --accent: #38bdf8;
-            --text-dim: #64748b;
-            --text-light: #f1f5f9;
-            --line-height: 1.6rem;
+            --bg-color: #1e1e1e; /* VS Code 风格深色背景 */
+            --code-bg: #252526;
+            --accent: #306998; /* Python 官方蓝 */
+            --accent-light: #4B8BBE;
+            --accent-yellow: #FFD43B; /* Python 官方黄 */
+            --text-dim: #858585;
+            --text-light: #d4d4d4;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-light);
-            overflow: hidden; /* 防止页面整体滚动 */
+            overflow: hidden;
         }
 
         .code-font {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* 滚动条美化 */
+        /* 滚动条 */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
+            width: 0px; 
             background: transparent;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #334155;
-            border-radius: 4px;
-        }
 
-        /* 代码行的动画效果 */
+        /* 代码行 */
         .code-line {
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0 1rem;
-            border-left: 2px solid transparent;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 0 2rem;
+            border-left: 4px solid transparent;
             opacity: 1;
             transform-origin: left center;
-            white-space: pre; /* 保留空格 */
+            white-space: pre; 
             display: flex;
+            align-items: center;
+            height: 1.8rem;
+            box-sizing: content-box;
         }
 
         .line-number {
             display: inline-block;
-            width: 2rem;
+            min-width: 3rem;
             color: var(--text-dim);
             text-align: right;
-            margin-right: 1rem;
+            margin-right: 2rem;
             user-select: none;
+            font-size: 0.85rem;
         }
 
-        /* 聚焦状态 */
+        #code-container {
+            padding-top: 50vh;
+            padding-bottom: 50vh;
+            scroll-behavior: smooth;
+        }
+
+        /* 聚焦状态 - Python 蓝主题 */
         .code-line.active {
             opacity: 1;
-            background-color: rgba(56, 189, 248, 0.1);
-            border-left: 2px solid var(--accent);
-            transform: scale(1.02) translateX(10px);
-            color: #fff;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            background-color: rgba(59, 130, 246, 0.1); /* 淡淡的蓝色背景 */
+            border-left-color: var(--accent-yellow); /* 左侧用黄色点缀 */
+            
+            transform: scale(2.5) translateX(2%); 
+            
+            margin-top: 1.8rem;
+            margin-bottom: 1.8rem;
+            
+            font-weight: 700; 
+            z-index: 10;
             filter: blur(0);
+            box-shadow: -10px 0 20px -5px rgba(0,0,0,0.5);
+        }
+        
+        .code-line.active .line-number {
+            color: var(--accent-yellow); /* 行号变黄 */
+            font-weight: bold;
         }
 
-        /* 非聚焦状态 */
         .code-line.inactive {
-            opacity: 0.25;
-            filter: blur(1.5px);
-            transform: scale(0.98);
+            opacity: 0.1; /* 调低透明度 */
+            filter: blur(3px);
+            transform: scale(0.8);
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
-        /* 语法高亮 (简单的模拟) */
-        .syntax-keyword { color: #c678dd; font-weight: bold; } /* def, class, return */
-        .syntax-string { color: #98c379; } /* "string" */
-        .syntax-comment { color: #5c6370; font-style: italic; } /* # comment */
-        .syntax-func { color: #61afef; } /* function_name */
-        .syntax-class { color: #e5c07b; } /* ClassName */
-        .syntax-decorator { color: #d19a66; } /* @decorator */
+        /* Python 语法高亮配色 (类似 VS Code Dark) */
+        .syntax-keyword { color: #569cd6; font-weight: bold; } /* 蓝色 import, def, if */
+        .syntax-string { color: #ce9178; } /* 橙色字符串 */
+        .syntax-comment { color: #6a9955; font-style: italic; } /* 绿色注释 */
+        .syntax-func { color: #dcdcaa; } /* 黄色函数名 */
+        .syntax-class { color: #4ec9b0; } /* 青色类名 */
+        .syntax-num { color: #b5cea8; } /* 浅绿数字 */
+        .syntax-decorator { color: #dcdcaa; }
 
-        /* 说明卡片动画 */
+        /* 说明面板 */
         .info-card {
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .fade-in-up {
-            animation: fadeInUp 0.5s ease forwards;
+            animation: fadeInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="h-screen flex flex-col md:flex-row">
+<body class="h-screen flex flex-col md:flex-row overflow-hidden">
 
     <!-- 左侧：代码视窗 -->
-    <div class="w-full md:w-2/3 h-1/2 md:h-full relative flex flex-col bg-slate-900 border-r border-slate-700 shadow-2xl">
-        <!-- 顶部 Mac 风格装饰栏 -->
-        <div class="h-10 bg-slate-800 flex items-center px-4 space-x-2 border-b border-slate-700 z-10 shrink-0">
-            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-            <span class="ml-4 text-xs text-slate-400 font-mono" id="filename-display">main.py</span>
+    <div class="w-full md:w-2/3 h-1/2 md:h-full relative flex flex-col bg-[#1e1e1e] border-r border-[#333] shadow-2xl z-0">
+        <!-- 装饰栏 -->
+        <div class="h-10 bg-[#2d2d2d] flex items-center px-6 space-x-2 border-b border-[#1e1e1e] z-20 shrink-0 absolute top-0 w-full">
+            <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+            <span class="ml-4 text-xs text-[#858585] font-mono tracking-wide flex items-center gap-2">
+                <span class="text-[#306998] font-bold">Python</span> 
+                <span class="text-[#d4d4d4]"> > GCT_Combined.py</span>
+            </span>
         </div>
 
         <!-- 代码滚动容器 -->
-        <div id="code-container" class="flex-1 overflow-y-auto custom-scrollbar p-6 code-font text-sm md:text-base leading-7 scroll-smooth">
-            <!-- 代码将由 JS 注入到这里 -->
+        <div id="code-container" class="flex-1 overflow-y-auto custom-scrollbar code-font text-base leading-relaxed relative z-10 text-[#d4d4d4]">
+            <!-- JS 注入点 -->
         </div>
         
-        <!-- 进度条 -->
-        <div class="h-1 bg-slate-800 w-full shrink-0">
-            <div id="progress-bar" class="h-full bg-sky-500 transition-all duration-300" style="width: 0%"></div>
+        <!-- 底部进度条 -->
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-[#252526] z-20">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-[#306998] to-[#FFD43B] transition-all duration-500 ease-out" style="width: 0%"></div>
         </div>
     </div>
 
     <!-- 右侧：控制与讲解区 -->
-    <div class="w-full md:w-1/3 h-1/2 md:h-full bg-slate-950 p-8 flex flex-col justify-between relative overflow-hidden">
+    <div class="w-full md:w-1/3 h-1/2 md:h-full bg-[#1e1e1e] p-8 flex flex-col justify-between relative z-10 border-t md:border-t-0 md:border-l border-[#333]">
         
-        <!-- 背景装饰 -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <!-- 装饰背景光: Python 蓝黄渐变 -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#306998]/20 to-[#FFD43B]/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div>
-            <h1 class="text-2xl font-bold text-white mb-2 tracking-tight">Project Explorer</h1>
-            <p class="text-slate-400 text-sm mb-8">互动式代码演示</p>
+        <div class="relative">
+            <div class="flex items-center gap-3 mb-2">
+                <!-- Python Logo SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="32" height="32">
+                    <path fill="#306998" d="M24 1.5c-6.8 0-6.4 3-6.4 3v3.2h6.4v.8h-8.8C9.5 8.5 4 12.1 4 18.2c0 6.6 3.6 8.5 8.5 8.5h2.1v-2.9c0-3.6 2.6-6.4 6.4-6.4h9.9v-4.1c0-4.6-4.2-11.8-6.9-11.8zM14.5 4.8a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2z"/>
+                    <path fill="#FFD43B" d="M24.2 46.5c6.8 0 6.4-3 6.4-3v-3.2h-6.4v-.8h8.8c5.7 0 11.2-3.6 11.2-9.7 0-6.6-3.6-8.5-8.5-8.5h-2.1v2.9c0 3.6-2.6 6.4-6.4 6.4h-9.9v4.1c0 4.6 4.2 11.8 6.9 11.8zM33.7 43.2a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2z"/>
+                </svg>
+                <h1 class="text-3xl font-bold text-white tracking-tight">GreenTracker</h1>
+            </div>
+            <p class="text-[#858585] text-sm mb-10 font-medium pl-11">Python Project Presentation</p>
 
             <!-- 动态说明卡片 -->
-            <div id="info-panel" class="bg-slate-900/50 border border-slate-700 p-6 rounded-xl shadow-lg backdrop-blur-sm min-h-[200px]">
-                <div class="flex items-center space-x-2 mb-4">
-                    <span id="step-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">INTRODUCTION</span>
+            <div id="info-panel" class="bg-[#252526] border border-[#333] p-8 rounded-xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span id="step-badge" class="px-2 py-1 rounded text-[11px] font-bold tracking-wider bg-[#306998]/20 text-[#4B8BBE] border border-[#306998]/30">INIT</span>
                 </div>
-                <h2 id="step-title" class="text-xl font-semibold text-sky-100 mb-3">准备开始</h2>
-                <p id="step-desc" class="text-slate-300 leading-relaxed text-sm">
-                    点击下方的“开始演示”按钮，我们将逐步解析这个 Python 项目的核心逻辑。
-                </p>
+                <h2 id="step-title" class="text-xl font-bold text-[#FFD43B] mb-4 tracking-tight">准备就绪</h2>
+                <div id="step-desc" class="text-[#d4d4d4] leading-7 text-sm space-y-2">
+                    <p>点击下方按钮开始演示。</p>
+                </div>
             </div>
         </div>
 
-        <!-- 控制按钮 -->
-        <div class="mt-8 z-10">
+        <!-- 控制按钮组 -->
+        <div class="mt-8 relative">
             <div class="flex space-x-4">
-                <button onclick="prevStep()" class="flex-1 px-4 py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-600 font-medium text-sm flex items-center justify-center gap-2 group">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-                    上一步
+                <button onclick="prevStep()" class="flex-1 px-6 py-4 rounded-lg bg-[#252526] hover:bg-[#333] text-[#858585] hover:text-white transition-all border border-[#333] font-medium text-sm flex items-center justify-center gap-2 group active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+                    Previous
                 </button>
-                <button onclick="nextStep()" class="flex-1 px-4 py-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition font-medium text-sm shadow-lg shadow-sky-900/50 flex items-center justify-center gap-2 group">
-                    下一步
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"/></svg>
+                <button onclick="nextStep()" class="flex-1 px-6 py-4 rounded-lg bg-[#306998] hover:bg-[#27557b] text-white transition-all font-bold text-sm shadow-lg flex items-center justify-center gap-2 group active:scale-95">
+                    Next Step
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
             </div>
-            <div class="text-center mt-4">
-                <button onclick="resetDemo()" class="text-xs text-slate-500 hover:text-slate-300 transition">重置演示</button>
+            <div class="text-center mt-6">
+                <button onclick="resetDemo()" class="text-xs font-mono text-[#4B8BBE] hover:text-[#FFD43B] transition cursor-pointer px-4 py-2 hover:bg-[#252526] rounded">RESTART</button>
             </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 1. 在这里配置你的 Python 代码
+        // 核心修正：使用“一次性正则匹配” (Single-Pass Regex)
+        // 彻底解决关键词在HTML标签内被误替换的 BUG
         // ==========================================
-        const projectTitle = "DataProcessor.py";
-        const pythonCode = `import time
-from dataclasses import dataclass
-from typing import List
-
-# 定义一个数据模型
-@dataclass
-class UserData:
-    id: int
-    username: str
-    is_active: bool = True
-
-class BatchProcessor:
-    """ 模拟一个批量数据处理器 """
-    
-    def __init__(self, batch_size: int = 5):
-        self.batch_size = batch_size
-        self.queue: List[UserData] = []
-        print(f"Processor initialized with batch size: {batch_size}")
-
-    def add_user(self, user: UserData):
-        """ 添加用户到队列，如果满了就处理 """
-        self.queue.append(user)
-        self.log(f"User {user.username} added.")
         
-        if len(self.queue) >= self.batch_size:
-            self._flush_queue()
+        const projectTitle = "GCT_Complete.py";
+        const pythonCode = `# ============================================================
+# PART 1: MODULE - green_tracker_advice.py
+# ============================================================
 
-    def _flush_queue(self):
-        """ 处理当前队列中的所有数据 """
-        print(f"--> Flushing {len(self.queue)} items...")
-        
-        # 模拟耗时操作 (例如写入数据库)
-        for user in self.queue:
-            self.process_single(user)
-            
-        self.queue.clear()
-        print("--> Batch complete.")
+# =========================
+# manage resident
+# =========================
+def manage_resident(residents):
+    print("\\n--- Manage Resident ---")
+    name = input("Enter resident name: ").strip()
+   
+    for r in residents:
+        if r[1].lower() == name.lower():
+            print("\\n1. Update record")
+            print("2. Delete record")
+            print("3. View this record")
+            action = input("Choose action (1-3): ").strip()
+ 
+            if action == "1":
+                new_mode = input("New transport mode (Car, Carpool, Bus, MRT, Walk/Bicycle )(or Enter to skip): ").strip().lower()
+                if new_mode in ["car","carpool","bus","mrt","walk/bicycle"]:
+                        r[2] = new_mode
+                   
+                new_distance = input("New distance (or Enter to skip): ").strip()
+                if new_distance.replace(".", "", 1).isnumeric():
+                        r[3] = float(new_distance)
+   
+                new_days = input("New days (or Enter to skip): ").strip()
+                if new_days.isnumeric():
+                        r[4] = int(new_days)
+                   
+               
+                print("Record updated!")
+                print("Updated record:", r)
+           
+            elif action == "2":
+                residents.remove(r)
+                print("Record deleted!")
+            elif action == "3":
+                print(r)
+            else:
+                print("Invalid action.")
+            return
+    else:
+        print("Resident not found.")
+ 
 
-    def process_single(self, user):
-        # 简单的逻辑处理
-        if user.is_active:
-            print(f"Saving active user: {user.id}")
+
+# =========================
+#       color
+# =========================
+
+def color(text, code):
+    """Return colored text using ANSI escape codes (no f-string)."""
+    return "\\033[" + str(code) + "m" + str(text) + "\\033[0m"
+
+# =========================
+#       ADVICES
+# =========================
+def advice(annual_footprint, user_mode_of_transport):
+    # Color codes
+    GREEN = "1;32"
+    BLUE = "1;34"
+    RED = "1;31"
+    YELLOW = "1;33"
+
+    print("\\nHere are some advice to reduce your carbon footprint:\\n")
+
+    # Low emitter
+    if annual_footprint < 500:
+        print(color("Low Emitter", GREEN), "- Your carbon footprint =", color(annual_footprint, GREEN),
+              ". You are doing great! Keep using", color(user_mode_of_transport, RED),
+              "and consider carpooling or using public transport occasionally.")
+
+    # Moderate emitter
+    elif 500 <= annual_footprint <= 1500:
+        print(color("Moderate Emitter", BLUE), "- Your carbon footprint =", color(annual_footprint, BLUE),
+              ". Consider the following tips:")
+
+        if user_mode_of_transport in ["car", "carpool"]:
+            print(color("- Try to carpool more often or switch to public transport like bus or MRT.", YELLOW))
+        elif user_mode_of_transport in ["bus", "mrt"]:
+            print(color("- Continue using public transport and consider walking or cycling for short distances.", YELLOW))
+
+    # High emitter
+    elif annual_footprint > 1500:
+        print(color("High Emitter", RED), "- Your carbon footprint =", color(annual_footprint, RED),
+              ". Here are some suggestions to lower your carbon footprint:")
+
+        if user_mode_of_transport in ["car", "carpool"]:
+            print(color("- Reduce car usage by carpooling, using public transport, or switching to walking/bicycling for short trips.", YELLOW))
+        elif user_mode_of_transport in ["bus", "mrt"]:
+            print(color("- While public transport is better, try to incorporate walking or cycling into your routine when possible.", YELLOW))
+
+
+# ============================================================
+# UNIVERSAL VALIDATION FUNCTION
+# ============================================================
+def validate_input(data, check_type, info, extra_check=None):
+    """
+    Generic validation function for user inputs.
+    Parameters:
+        data         : user input value
+        check_type   : validation function (e.g., str.isalpha, is_float)
+        info         : field name for error display
+        extra_check  : optional additional rule (e.g., range limit)
+    Returns:
+        True if validation passes, False otherwise.
+    """
+    if not check_type(str(data)):
+        print("Invalid input for", info, "- please enter a valid", info, "\\n")
+        return False
+
+    if extra_check is not None and not extra_check(data):
+        print("Invalid", info, "- please check the allowed range or format.\\n")
+        return False
+
+    return True
+
+
+# ============================================================
+# HELPER FUNCTIONS FOR SPECIFIC VALIDATION RULES
+# ============================================================
+def is_float(value):
+    """Check if a string value can be converted to a float."""
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def check_days_limit(value):
+    #Check if type = integer & <= than 7.
+    try:
+        return int(value) <= 7
+    except:
+        return False
+
+
+
+
+
+
+
+
+
+def community_advice(average_emission, total_emission):
+    """
+    Provide community-level advice based on average and total carbon emissions.
+    Uses the color() function for colored output (no f-strings).
+    """
+
+    print("\\n--- Community Emission Advice ---")
+
+    # ======== Display the numbers with color ========
+    print("Total Carbon Emission : " + color(str(round(total_emission, 2)) + " kg CO₂", 93))
+    print("Average Carbon Emission per Resident : " + color(str(round(average_emission, 2)) + " kg CO₂", 92))
+
+    # ======== Evaluate total community emission ========
+    print("\\n[Community Emission Evaluation]")
+    if total_emission < 1000:
+        print("Excellent! Your community is maintaining a very low overall carbon emission level.")
+        print("Keep encouraging walking, cycling, and MRT usage. Continue sharing knowledge about green habits.")
+    elif 1000 <= total_emission < 5000:
+        print("Good performance, but there's still room to improve.")
+        print("Try promoting public transport and carpooling to further reduce total community emissions.")
+    elif 5000 <= total_emission < 10000:
+        print("Moderate emission level detected.")
+        print("Consider organizing awareness campaigns and monitoring high-emission residents or transport modes.")
+    elif 10000 <= total_emission < 20000:
+        print("High emission level for your community.")
+        print("Encourage switching from cars to public transport, and reward residents who adopt greener choices.")
+    else:
+        print("Critical level of carbon emission detected.")
+        print("Immediate action is needed — review transport habits, optimize routes, and consider community-wide sustainability programs.")
+
+    # ======== Evaluate average individual emission ========
+    print("\\n[Individual Average Evaluation]")
+    if average_emission < 200:
+        print("Outstanding! Each resident contributes very little to the carbon footprint.")
+        print("Keep maintaining these sustainable transport habits and inspire other communities.")
+    elif 200 <= average_emission < 600:
+        print("Good individual performance overall.")
+        print("Try small improvements like occasional cycling or using public transport instead of private cars.")
+    elif 600 <= average_emission < 1000:
+        print("Moderate personal emission detected.")
+        print("Residents could reduce emissions by cutting down short car trips and promoting shared rides.")
+    elif 1000 <= average_emission < 2000:
+        print("High personal emission level on average.")
+        print("Encourage people to calculate their personal footprints and shift towards eco-friendly travel.")
+    else:
+        print("Very high personal emission level.")
+        print("Community intervention may be required — offer incentives for green commuting and reduce dependence on cars.")
+
+
+# ============================================================
+# PART 2: MAIN PROGRAM - GCT(main).py
+# ============================================================
+from tabulate import tabulate 
+
+# from green_tracker_advice import ... (Imported above via copy-paste)
+
+# ============================================================
+# DATA INITIALIZATION
+# ============================================================
+can_countinue = False
+transport_mode = ["car", "bus", "bicycle", "walking", "carpool", "mrt", "walk"]
+index = 0
+residents = []
+user_mode_of_transport = None
+total_carbon = 0
+# Emission factors: [Transport mode, emission rate (kg CO₂/km)]
+emission_factors ={
+  "car": 0.21,
+  "carpool": 0.10,
+  "bus": 0.08,
+  "mrt": 0.05,
+  "walk": 0.00,
+  "bicycle": 0.00,
+  "walking": 0.00
+}
+
+ 
+# ============================================================
+# MAIN PROGRAM LOOP
+# ============================================================
+while True:
+
+    # ------------------- MAIN MENU -------------------
+    print("\\n    Welcome to GreenCommute Tracker!\\n")
+    print("[1] Add Resident Transport Record")   
+    print("[2] View All Records")                               
+    print("[3] Calculate Carbon Footprint")             
+    print("[4] manage resident")             
+    print("[5] Generage community emission summary")        
+    print("[6] Exit")                                   
+
+    choice = input("Enter your choice (1-6): ")
+
+    # ============================================================
+    # FUNCTION 1: ADD NEW RESIDENT RECORD
+    # ============================================================
+    if choice == '1':
+
+        userinfo = []
+        index += 1
+        userinfo.append(index)
+
+        # --------------------------------------------------------
+        # need_info list controls the sequence of required inputs.
+        # Each element includes:
+        #   [field_name, prompt_text, validation_function, extra_rule]
+        # --------------------------------------------------------
+        need_info = [
+            ["name", "Enter your Name OR enter q to quit: ", str.isalpha, None],
+            ["transport", "Enter your Main Mode of Transport (Car, Bus, MRT, etc.) OR q to quit: ", str.isalpha, None],
+            ["distance", "Enter your Average Weekly Distance (in km): ", is_float, None],
+            ["days", "Enter number of days travelled per week (max 7) OR q to quit: ", str.isnumeric, check_days_limit]
+        ]
+
+        # Input control variable
+        current = 0
+
+        # ------------------- INPUT LOOP -------------------
+        while current < len(need_info):
+            # Extract input requirements from need_info
+            field, message, check_func, extra = need_info[current]
+
+            # Get user input
+            user_input = input(message)
+
+            # Allow user to quit the process
+            if user_input.lower() == "q":
+                print("\\nProcess aborted by user.\\n")
+                break
+
+            # Clean input for validation (remove spaces only for checking)
+            clean_input = "".join(user_input.split())
+
+            # Specific validation for transport type
+            if field == "transport":
+                if clean_input.lower() not in transport_mode:
+                    print("Invalid transport mode! Please choose one of:", ", ".join(transport_mode), "\\n")
+                    continue
+
+            # Generic validation for text or numeric fields
+            if validate_input(clean_input, check_func, field, extra):
+                # For name, keep original spacing in stored data
+                if field == "name":
+                    userinfo.append(user_input.strip())
+                else:
+                    userinfo.append(clean_input)
+                current += 1
+            else:
+                continue
+
+        # ------------------- SAVE RECORD -------------------
+        if len(userinfo) == len(need_info) + 1:
+            residents.append(userinfo)
+            print("\\nResident transport record added successfully!\\n")
+            print(userinfo)
         else:
-            print(f"Skipping inactive user: {user.id}")
+            print("\\nRecord incomplete or cancelled.\\n")
 
-    def log(self, msg):
-        timestamp = time.strftime("%H:%M:%S")
-        print(f"[{timestamp}] {msg}")
 
-# 运行演示
-if __name__ == "__main__":
-    processor = BatchProcessor(batch_size=2)
-    processor.add_user(UserData(1, "Alice"))
-    processor.add_user(UserData(2, "Bob", False)) # 这会触发 Flush`;
+    # ============================================================
+    # FUNCTION 2: VIEW ALL RECORDS
+    # ============================================================
+    elif choice == '2':
+        if not residents:
+            print("No resident transport records found.")
+        else:
+            headers = ["Index", "Name", "Main Mode of Transport", "Average Weekly Distance (km)", "Days Travels per Week"]
+            print(tabulate(residents, headers, tablefmt="grid"))
+
+
+    # ============================================================
+    # FUNCTION 3: CALCULATE CARBON FOOTPRINT
+    # ============================================================
+    elif choice == '3':
+        user_name = input("Enter your Name (as recorded) to calculate Carbon Footprint: ").strip()
+        found = False
+
+        for res in residents:
+            if res[1].lower() == user_name.lower():
+                dist = float(res[3])
+                days = int(res[4])
+                mode = res[2].lower()
+
+                # Find matching emission factor
+                emission_factor_caculate = emission_factors.get(mode)
+                if emission_factor_caculate is None:
+                    print("Invalid transport mode in record:", mode)
+                else:
+                    annual_footprint = dist * days * 52 * emission_factor_caculate
+                    advice(annual_footprint, mode)
+                    found = True
+                break
+
+        if not found:
+            print("No record found for", user_name, ". Please add a record first (option 1).")
+
+
+    # ============================================================
+    # FUNCTION 4:MANAGE RESIDENTS
+    # ============================================================
+    elif choice == '4':
+        manage_resident(residents)
+    # =============================================
+    # FUNCTION 5: COMMUNITY EMISSION SUMMARY
+    # =============================================
+    elif choice == "5":
+        for num in range(len(residents)):
+            total_carbon += float(residents[num][3]) * emission_factors[residents [num][2]]
+
+        ave_carbon=total_carbon / len(residents)
+        
+        community_advice(ave_carbon,total_carbon)
+    # =============================================
+    # FUNCTION 6: EXIT PROGRAM
+    # =============================================
+    elif choice == '6':
+        print("Thank you for supporting the GreenCommute Initiative!")
+        break
+
+    else:
+        print("Invalid option! Please enter a number between 1 and 5.")`;
 
         // ==========================================
-        // 2. 在这里配置演示步骤
-        // range: [开始行号, 结束行号] (从1开始)
+        // 演示步骤
         // ==========================================
         const steps = [
             {
-                range: null, // null 表示显示全部，不聚焦
-                title: "项目概览",
-                desc: "这是一个简单的 Python 批处理系统模拟。它演示了类设计、类型提示 (Type Hints) 和队列管理逻辑。让我们开始深入代码细节。",
-                badge: "OVERVIEW"
+                range: null, 
+                title: "代码概览",
+                desc: "已加载您的完整源代码。<br>包含 `green_tracker_advice.py` (模块) 和 `GCT(main).py` (主逻辑)。<br>颜色已调整为 Python IDE 风格。",
+                badge: "ALL FILES"
             },
             {
-                range: [1, 3],
-                title: "导入依赖",
-                desc: "我们首先导入必要的标准库。`dataclass` 用于快速构建数据类，`typing` 用于让代码更规范、易读。",
-                badge: "IMPORTS"
+                range: [8, 48],
+                title: "模块: 居民管理",
+                desc: "`manage_resident` 函数。<br>实现了查找居民、更新数据（模式、距离、天数）或删除记录的完整逻辑。",
+                badge: "MODULE"
             },
             {
-                range: [6, 10],
-                title: "数据模型 (Data Class)",
-                desc: "使用 `@dataclass` 装饰器定义 `UserData`。这比传统的 `__init__` 写法更简洁，自动帮我们生成初始化方法和 `__repr__`。",
-                badge: "MODEL"
+                range: [60, 93],
+                title: "模块: 碳足迹建议",
+                desc: "`advice` 函数。<br>根据计算出的年排放量（Low/Moderate/High），提供具体的减排建议。",
+                badge: "MODULE"
             },
             {
-                range: [12, 18],
-                title: "处理器初始化",
-                desc: "`BatchProcessor` 类负责业务逻辑。我们在 `__init__` 中设置了批次大小 (`batch_size`) 并初始化了一个空列表作为缓冲区。",
-                badge: "INIT"
+                range: [97, 137],
+                title: "模块: 输入验证",
+                desc: "`validate_input` 通用验证函数，以及 `is_float`, `check_days_limit` 辅助函数。<br>确保用户输入的数据格式正确。",
+                badge: "MODULE"
             },
             {
-                range: [20, 26],
-                title: "核心逻辑：添加用户",
-                desc: "`add_user` 方法是外部调用的入口。它将用户加入队列，并检查是否达到了 `batch_size` 阈值。如果达到了，就触发 `_flush_queue`。",
-                badge: "CORE LOGIC"
+                range: [147, 186],
+                title: "模块: 社区建议",
+                desc: "`community_advice` 函数。<br>评估社区总排放量和人均排放量，给出宏观评价和行动建议。",
+                badge: "MODULE"
             },
             {
-                range: [28, 38],
-                title: "私有方法：刷新队列",
-                desc: "`_flush_queue` 处理实际的业务。它遍历当前队列，逐个处理用户，最后清空队列等待下一批数据。",
-                badge: "PRIVATE METHOD"
+                range: [195, 215],
+                title: "主程序: 初始化",
+                desc: "这里是 `GCT(main).py` 的开始。<br>初始化变量 `residents`, `transport_mode` 和排放因子 `emission_factors`。",
+                badge: "MAIN"
             },
             {
-                range: [52, 55],
-                title: "实际运行",
-                desc: "在主程序入口，我们实例化处理器（设置容量为2），并添加两个用户。注意：添加第二个用户时，因为满足了批次大小，会自动触发处理逻辑。",
-                badge: "EXECUTION"
+                range: [219, 233],
+                title: "主循环与菜单",
+                desc: "无限循环 `while True` 显示主菜单。<br>提供 6 个选项供用户选择。",
+                badge: "MAIN LOOP"
+            },
+            {
+                range: [238, 298],
+                title: "功能 1: 添加记录",
+                desc: "包含完整的输入验证循环。<br>使用 `need_info` 列表驱动输入流程，确保数据完整性。",
+                badge: "OPTION 1"
+            },
+            {
+                range: [304, 309],
+                title: "功能 2: 查看记录",
+                desc: "使用 `tabulate` 库将居民列表格式化为表格输出。",
+                badge: "OPTION 2"
+            },
+            {
+                range: [315, 335],
+                title: "功能 3: 计算足迹",
+                desc: "查找用户，计算公式：距离 * 天数 * 52 * 因子。<br>调用之前定义的 `advice` 函数展示结果。",
+                badge: "OPTION 3"
+            },
+            {
+                range: [348, 355],
+                title: "功能 5: 社区统计",
+                desc: "遍历所有居民计算总排放，并计算平均值。<br>调用 `community_advice` 展示社区层面的建议。",
+                badge: "OPTION 5"
             }
         ];
 
         // ==========================================
-        // 3. 核心逻辑 (渲染与交互)
+        // 核心渲染逻辑 (Fixed)
         // ==========================================
         
         let currentStepIndex = 0;
         const codeContainer = document.getElementById('code-container');
-        const filenameDisplay = document.getElementById('filename-display');
         
-        // 简单的语法高亮函数
         function highlightSyntax(line) {
-            let html = line
-                .replace(/</g, "&lt;").replace(/>/g, "&gt;") // 转义 HTML
-                .replace(/#.*/g, '<span class="syntax-comment">$&</span>') // 注释
-                .replace(/(['"])(?:(?!\1|\\).|\\.)*\1/g, '<span class="syntax-string">$&</span>') // 字符串
-                .replace(/\b(import|from|class|def|return|if|else|self|print)\b/g, '<span class="syntax-keyword">$1</span>') // 关键字
-                .replace(/@\w+/g, '<span class="syntax-decorator">$&</span>'); // 装饰器
+            // 先处理 HTML 转义，防止 HTML 注入和干扰
+            let cleanLine = line.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-            // 函数名和类名的高亮尝试 (简单正则)
-            html = html.replace(/(class\s+)(\w+)/, '$1<span class="syntax-class">$2</span>');
-            html = html.replace(/(def\s+)(\w+)/, '$1<span class="syntax-func">$2</span>');
+            // 定义关键词列表
+            const keywords = "import|from|class|def|return|if|elif|else|while|for|in|input|print|float|int|len|break|continue|try|except|None|True|False|and|or|not|as|with|global";
             
-            return html;
+            // 构造一次性正则 (Single Pass Regex)
+            // 捕获组顺序：
+            // 1. 注释 (#...)
+            // 2. 字符串 ("..." | '...')
+            // 3. 函数/类定义 (def xxx | class xxx) -> 需要拆分处理
+            // 4. 关键词 (import, return...)
+            // 5. 数字
+            // 6. 装饰器 (@xxx)
+            const tokenRegex = new RegExp(
+                `(#.*)|` + 
+                `(['"](?:(?!\\2|\\\\).|\\\\.)*\\2)|` + 
+                `\\b(def|class)(\\s+)(\\w+)|` + // Group 3(key), 4(space), 5(name)
+                `\\b(${keywords})\\b|` + // Group 6
+                `(\\b\\d+(?:\\.\\d+)?\\b)|` + // Group 7
+                `(@\\w+)`, // Group 8
+                'g'
+            );
+
+            return cleanLine.replace(tokenRegex, (match, comment, string, defKeyword, defSpace, defName, keyword, number, decorator) => {
+                if (comment) return `<span class="syntax-comment">${comment}</span>`;
+                if (string) return `<span class="syntax-string">${string}</span>`;
+                
+                // 特殊处理 def name 或 class name，以便给名字加上不同的颜色
+                if (defKeyword) {
+                    const nameClass = defKeyword === 'class' ? 'syntax-class' : 'syntax-func';
+                    return `<span class="syntax-keyword">${defKeyword}</span>${defSpace}<span class="${nameClass}">${defName}</span>`;
+                }
+
+                if (keyword) return `<span class="syntax-keyword">${keyword}</span>`;
+                if (number) return `<span class="syntax-num">${number}</span>`;
+                if (decorator) return `<span class="syntax-decorator">${decorator}</span>`;
+                
+                return match;
+            });
         }
 
-        // 初始化渲染代码
         function renderCode() {
-            filenameDisplay.innerText = projectTitle;
             const lines = pythonCode.split('\n');
             codeContainer.innerHTML = '';
 
             lines.forEach((line, index) => {
                 const lineDiv = document.createElement('div');
-                lineDiv.className = 'code-line inactive'; // 默认非激活
+                lineDiv.className = 'code-line inactive'; 
                 lineDiv.id = `line-${index + 1}`;
                 
-                // 行号
                 const lineNum = document.createElement('span');
                 lineNum.className = 'line-number';
                 lineNum.innerText = index + 1;
                 
-                // 代码内容
                 const codeContent = document.createElement('span');
                 codeContent.innerHTML = highlightSyntax(line);
                 
@@ -324,81 +713,83 @@ if __name__ == "__main__":
                 codeContainer.appendChild(lineDiv);
             });
             
-            updateView();
+            updateView(false);
         }
 
-        // 更新视图状态
-        function updateView() {
+        function updateView(animate = true) {
             const step = steps[currentStepIndex];
             const lines = document.querySelectorAll('.code-line');
             
-            // 1. 更新右侧说明面板
+            // 更新信息面板
             const infoPanel = document.getElementById('info-panel');
             const stepTitle = document.getElementById('step-title');
             const stepDesc = document.getElementById('step-desc');
             const stepBadge = document.getElementById('step-badge');
             
-            // 添加淡入动画
             infoPanel.classList.remove('fade-in-up');
-            void infoPanel.offsetWidth; // 触发重绘
+            void infoPanel.offsetWidth; 
             infoPanel.classList.add('fade-in-up');
 
             stepTitle.innerText = step.title;
-            stepDesc.innerText = step.desc;
+            stepDesc.innerHTML = step.desc;
             stepBadge.innerText = step.badge;
 
-            // 2. 更新进度条
+            // 更新进度条
             const progress = ((currentStepIndex + 1) / steps.length) * 100;
             document.getElementById('progress-bar').style.width = `${progress}%`;
 
-            // 3. 处理代码高亮与滚动
-            let firstActiveLine = null;
-            let lastActiveLine = null;
-
+            // 处理高亮
+            let activeLineIndices = [];
+            
             lines.forEach((line, idx) => {
                 const lineNum = idx + 1;
-                // 判断当前行是否在范围内
                 let isActive = false;
                 
                 if (step.range) {
                     if (lineNum >= step.range[0] && lineNum <= step.range[1]) {
                         isActive = true;
+                        activeLineIndices.push(idx);
                     }
                 } else {
-                    // 如果 range 为 null，显示概览模式（所有代码半亮或全亮，这里选择全亮但不大）
-                    line.className = 'code-line active';
+                    // 概览模式
+                    line.className = 'code-line'; 
+                    line.style.opacity = '1';
                     line.style.transform = 'scale(1)';
                     line.style.filter = 'blur(0)';
-                    return; 
+                    line.style.margin = '0';
+                    return;
                 }
 
                 if (isActive) {
                     line.className = 'code-line active';
-                    if (!firstActiveLine) firstActiveLine = line;
-                    lastActiveLine = line;
                 } else {
                     line.className = 'code-line inactive';
                 }
             });
 
-            // 4. 自动滚动逻辑
-            if (step.range && firstActiveLine) {
-                // 计算中心位置
-                const containerHeight = codeContainer.clientHeight;
-                const lineTop = firstActiveLine.offsetTop;
-                const lineHeight = firstActiveLine.offsetHeight;
-                const activeHeight = (step.range[1] - step.range[0] + 1) * lineHeight;
+            // 自动滚动
+            if (step.range && activeLineIndices.length > 0) {
+                const middleIndex = activeLineIndices[Math.floor(activeLineIndices.length / 2)];
+                const targetLine = document.getElementById(`line-${middleIndex + 1}`);
                 
-                // 目标滚动位置：让代码块居中
-                const targetScroll = lineTop - (containerHeight / 2) + (activeHeight / 2);
-
-                codeContainer.scrollTo({
-                    top: targetScroll,
-                    behavior: 'smooth'
-                });
-            } else {
-                // 概览模式滚回顶部
-                codeContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                if (targetLine) {
+                    const delay = animate ? 250 : 0;
+                    setTimeout(() => {
+                        targetLine.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }, delay);
+                }
+            } else if (!step.range) {
+                const firstLine = document.getElementById('line-1');
+                if (firstLine) {
+                    const targetScroll = firstLine.offsetTop - 30;
+                    codeContainer.scrollTo({ 
+                        top: targetScroll, 
+                        behavior: 'smooth' 
+                    });
+                }
             }
         }
 
@@ -421,7 +812,6 @@ if __name__ == "__main__":
             updateView();
         }
 
-        // 键盘导航
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
                 nextStep();
@@ -430,7 +820,6 @@ if __name__ == "__main__":
             }
         });
 
-        // 启动
         window.onload = renderCode;
 
     </script>
